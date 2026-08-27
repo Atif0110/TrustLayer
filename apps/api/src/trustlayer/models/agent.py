@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
+
 from trustlayer.db.base import Base
 
 

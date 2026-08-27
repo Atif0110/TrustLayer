@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from trustlayer.auth.dependencies import OrganizationPrincipal, get_current_organization_principal, get_db
+from trustlayer.auth.dependencies import (
+    OrganizationPrincipal,
+    get_current_organization_principal,
+    get_db,
+)
 from trustlayer.authorization.service import check_authorization
 from trustlayer.schemas.authorization import AuthorizationCheckRequest, AuthorizationCheckResponse
 
@@ -14,7 +18,7 @@ async def authorization_check_route(
     principal: OrganizationPrincipal = Depends(get_current_organization_principal),
     session: AsyncSession = Depends(get_db),
 ) -> AuthorizationCheckResponse:
-    """Evaluate the active organization policy for an agent action and persist the audited result."""
+    """Evaluate an agent action against the active policy and persist the audited result."""
 
     try:
         result = await check_authorization(

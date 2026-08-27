@@ -38,7 +38,9 @@ async def approve_route(
     """Approve a pending request for the authenticated user's organization."""
 
     try:
-        status_value = await decide_approval(approval_id=approval_id, user=user, session=session, approve=True)
+        status_value = await decide_approval(
+            approval_id=approval_id, user=user, session=session, approve=True
+        )
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except PermissionError as error:
@@ -57,7 +59,9 @@ async def deny_route(
     """Deny a pending request for the authenticated user's organization."""
 
     try:
-        status_value = await decide_approval(approval_id=approval_id, user=user, session=session, approve=False)
+        status_value = await decide_approval(
+            approval_id=approval_id, user=user, session=session, approve=False
+        )
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except PermissionError as error:

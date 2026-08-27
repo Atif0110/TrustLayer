@@ -33,7 +33,9 @@ async def signup_route(
         raise HTTPException(status_code=429, detail="too many signup attempts")
 
     try:
-        result = await signup(name=body.name, email=body.email, password=body.password, session=session)
+        result = await signup(
+            name=body.name, email=body.email, password=body.password, session=session
+        )
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
 

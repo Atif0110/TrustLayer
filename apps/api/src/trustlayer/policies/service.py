@@ -11,12 +11,12 @@ from trustlayer.schemas.common import ScalarValue
 RuleRecord = dict[str, dict[str, ScalarValue] | str]
 
 
-async def create_policy(*, name: str, rules: list[RuleRecord], user: User, session: AsyncSession) -> Policy:
+async def create_policy(
+    *, name: str, rules: list[RuleRecord], user: User, session: AsyncSession
+) -> Policy:
     version = await next_policy_version(organization_id=user.organization_id, session=session)
     await session.execute(
-        update(Policy)
-        .where(Policy.organization_id == user.organization_id)
-        .values(is_active=False)
+        update(Policy).where(Policy.organization_id == user.organization_id).values(is_active=False)
     )
     policy = Policy(
         organization_id=user.organization_id,

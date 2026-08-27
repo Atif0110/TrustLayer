@@ -4,7 +4,6 @@ from pydantic import BaseModel, Field, field_validator
 
 from trustlayer.schemas.common import ScalarValue
 
-
 DecisionType = str
 
 

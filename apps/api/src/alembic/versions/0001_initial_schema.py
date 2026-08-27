@@ -5,10 +5,10 @@ Revises:
 Create Date: 2026-08-27 00:00:00.000000
 """
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
 
 revision = "0001_initial_schema"
 down_revision = None
@@ -26,38 +26,65 @@ def upgrade() -> None:
         "organizations",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
     )
 
     op.create_table(
         "users",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("password_hash", sa.String(length=255), nullable=False),
         sa.Column("role", user_role, nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.UniqueConstraint("organization_id", "email", name="uq_users_org_email"),
     )
 
     op.create_table(
         "agents",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
         sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("owner_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "owner_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False
+        ),
         sa.Column("status", agent_status, nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
     )
 
     op.create_table(
         "agent_keys",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
-        sa.Column("agent_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("agents.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
+        sa.Column(
+            "agent_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("agents.id"), nullable=False
+        ),
         sa.Column("key_prefix", sa.String(length=24), nullable=False),
         sa.Column("key_hash", sa.String(length=128), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.Column("revoked_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
         sa.UniqueConstraint("key_prefix", name="uq_agent_keys_prefix"),
@@ -66,12 +93,19 @@ def upgrade() -> None:
     op.create_table(
         "policies",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
         sa.Column("name", sa.String(length=200), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("rules", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.UniqueConstraint("organization_id", "version", name="uq_policies_org_version"),
     )
     op.create_index(
@@ -85,27 +119,47 @@ def upgrade() -> None:
     op.create_table(
         "authorization_requests",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
-        sa.Column("agent_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("agents.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
+        sa.Column(
+            "agent_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("agents.id"), nullable=False
+        ),
         sa.Column("action", sa.String(length=200), nullable=False),
         sa.Column("resource", sa.String(length=500), nullable=False),
         sa.Column("context", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("policy_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("policies.id"), nullable=False),
+        sa.Column(
+            "policy_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("policies.id"), nullable=False
+        ),
         sa.Column("policy_version", sa.Integer(), nullable=False),
         sa.Column("decision", sa.String(length=32), nullable=False),
         sa.Column("reason", sa.String(length=500), nullable=False),
         sa.Column("request_id", sa.String(length=32), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.UniqueConstraint("request_id", name="uq_authorization_requests_request_id"),
     )
 
     op.create_table(
         "approval_requests",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("authorization_request_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("authorization_requests.id"), nullable=False),
+        sa.Column(
+            "authorization_request_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("authorization_requests.id"),
+            nullable=False,
+        ),
         sa.Column("status", approval_status, nullable=False, server_default="pending"),
-        sa.Column("requested_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column("decided_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=True),
+        sa.Column(
+            "requested_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
+        sa.Column(
+            "decided_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=True
+        ),
         sa.Column("decided_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
     )
@@ -113,7 +167,12 @@ def upgrade() -> None:
     op.create_table(
         "audit_logs",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
-        sa.Column("organization_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("organizations.id"), nullable=False),
+        sa.Column(
+            "organization_id",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("organizations.id"),
+            nullable=False,
+        ),
         sa.Column("actor_type", sa.String(length=16), nullable=False),
         sa.Column("actor_id", sa.String(length=64), nullable=False),
         sa.Column("action", sa.String(length=200), nullable=False),
@@ -122,7 +181,9 @@ def upgrade() -> None:
         sa.Column("reason", sa.String(length=500), nullable=False),
         sa.Column("policy_version", sa.Integer(), nullable=False),
         sa.Column("request_id", sa.String(length=32), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
     )
     op.execute(
         """

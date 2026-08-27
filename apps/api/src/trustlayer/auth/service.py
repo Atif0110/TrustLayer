@@ -6,7 +6,12 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from trustlayer.auth.security import create_access_token, create_refresh_token, hash_password, verify_password
+from trustlayer.auth.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+)
 from trustlayer.models.organization import Organization
 from trustlayer.models.user import User, UserRole
 

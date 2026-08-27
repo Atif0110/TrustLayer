@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
 import hashlib
 import hmac
 import secrets
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import jwt
@@ -40,7 +40,9 @@ def hash_api_key(raw_key: str) -> str:
     return hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
 
 
-def _encode_token(*, user_id: UUID, organization_id: UUID, token_type: str, expires_at: datetime) -> str:
+def _encode_token(
+    *, user_id: UUID, organization_id: UUID, token_type: str, expires_at: datetime
+) -> str:
     payload = {
         "sub": str(user_id),
         "org": str(organization_id),

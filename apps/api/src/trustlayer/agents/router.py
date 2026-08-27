@@ -73,7 +73,9 @@ async def get_agent_route(
         agent = await get_agent(agent_id=agent_id, user=user, session=session)
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
-    return AgentResponse(id=str(agent.id), name=agent.name, status=agent.status.value, created_at=agent.created_at)
+    return AgentResponse(
+        id=str(agent.id), name=agent.name, status=agent.status.value, created_at=agent.created_at
+    )
 
 
 @router.get("/{agent_id}/keys", response_model=list[AgentKeyResponse])
@@ -126,7 +128,9 @@ async def revoke_agent_key_route(
     """Revoke one existing agent key without creating a replacement."""
 
     try:
-        agent_key = await revoke_agent_key(agent_id=agent_id, key_id=key_id, user=user, session=session)
+        agent_key = await revoke_agent_key(
+            agent_id=agent_id, key_id=key_id, user=user, session=session
+        )
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     return AgentKeyResponse(

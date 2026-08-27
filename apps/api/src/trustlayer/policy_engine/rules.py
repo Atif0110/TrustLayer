@@ -3,7 +3,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 
-def matches_condition(condition: Mapping[str, object], *, action: str, context: Mapping[str, object]) -> bool:
+def matches_condition(
+    condition: Mapping[str, object], *, action: str, context: Mapping[str, object]
+) -> bool:
     if condition.get("action") != action:
         return False
 
@@ -12,14 +14,14 @@ def matches_condition(condition: Mapping[str, object], *, action: str, context: 
             continue
         if key.endswith("_lte"):
             actual = context.get(key[:-4])
-            if not isinstance(actual, (int, float)) or not isinstance(expected, (int, float)):
+            if not isinstance(actual, int | float) or not isinstance(expected, int | float):
                 return False
             if actual > expected:
                 return False
             continue
         if key.endswith("_gt"):
             actual = context.get(key[:-3])
-            if not isinstance(actual, (int, float)) or not isinstance(expected, (int, float)):
+            if not isinstance(actual, int | float) or not isinstance(expected, int | float):
                 return False
             if actual <= expected:
                 return False

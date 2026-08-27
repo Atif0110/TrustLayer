@@ -1,6 +1,5 @@
 from trustlayer.policy_engine.evaluator import evaluate
 
-
 RULES = [
     {"if": {"action": "refund.create", "amount_lte": 100}, "then": "ALLOW"},
     {"if": {"action": "refund.create", "amount_gt": 100}, "then": "REQUIRE_APPROVAL"},

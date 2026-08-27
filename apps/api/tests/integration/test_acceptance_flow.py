@@ -21,7 +21,9 @@ def test_database_url() -> str:
         return
 
     with PostgresContainer("postgres:16") as postgres:
-        yield postgres.get_connection_url().replace("postgresql+psycopg2://", "postgresql+asyncpg://")
+        yield postgres.get_connection_url().replace(
+            "postgresql+psycopg2://", "postgresql+asyncpg://"
+        )
 
 
 @pytest.fixture
@@ -41,7 +43,9 @@ async def client(test_database_url: str, monkeypatch: pytest.MonkeyPatch) -> Asy
     config = importlib.import_module("alembic.config").Config(
         str(Path(__file__).resolve().parents[2] / "alembic.ini")
     )
-    config.set_main_option("script_location", str(Path(__file__).resolve().parents[2] / "src/alembic"))
+    config.set_main_option(
+        "script_location", str(Path(__file__).resolve().parents[2] / "src/alembic")
+    )
     importlib.import_module("alembic.command").upgrade(config, "head")
 
     app = importlib.import_module("trustlayer.main").create_app()
@@ -54,7 +58,11 @@ async def expire_approval(test_database_url: str, approval_id: str) -> None:
     engine = create_async_engine(test_database_url)
     async with engine.begin() as connection:
         await connection.execute(
-            text("UPDATE approval_requests SET expires_at = NOW() - INTERVAL '1 hour' WHERE id = :approval_id"),
+            text(
+                "UPDATE approval_requests "
+                "SET expires_at = NOW() - INTERVAL '1 hour' "
+                "WHERE id = :approval_id"
+            ),
             {"approval_id": approval_id},
         )
     await engine.dispose()
@@ -143,7 +151,9 @@ async def test_section_five_acceptance_flow(client: AsyncClient) -> None:
     assert signup_two.status_code == 200
     owner_two_headers = {"Authorization": f"Bearer {signup_two.json()['access_token']}"}
 
-    foreign_approval = await client.post(f"/v1/approvals/{approval_id}/approve", headers=owner_two_headers)
+    foreign_approval = await client.post(
+        f"/v1/approvals/{approval_id}/approve", headers=owner_two_headers
+    )
     assert foreign_approval.status_code == 404
 
 
@@ -162,7 +172,9 @@ async def test_expired_approval_cannot_be_approved(client: AsyncClient) -> None:
         "/v1/policies",
         json={
             "name": "refund policy",
-            "rules": [{"if": {"action": "refund.create", "amount_gt": 100}, "then": "REQUIRE_APPROVAL"}],
+            "rules": [
+                {"if": {"action": "refund.create", "amount_gt": 100}, "then": "REQUIRE_APPROVAL"}
+            ],
         },
         headers=headers,
     )
@@ -186,7 +198,9 @@ async def test_expired_approval_cannot_be_approved(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_login_requires_organization_name_when_email_exists_in_multiple_orgs(client: AsyncClient) -> None:
+async def test_login_requires_organization_name_when_email_exists_in_multiple_orgs(
+    client: AsyncClient,
+) -> None:
     signup_one = await client.post(
         "/v1/auth/signup",
         json={"name": "Acme", "email": "shared@acme.test", "password": "supersecret123"},
@@ -204,10 +218,17 @@ async def test_login_requires_organization_name_when_email_exists_in_multiple_or
         json={"email": "shared@acme.test", "password": "supersecret123"},
     )
     assert ambiguous.status_code == 401
-    assert ambiguous.json()["detail"] == "multiple organizations use this email; provide organization name"
+    assert (
+        ambiguous.json()["detail"]
+        == "multiple organizations use this email; provide organization name"
+    )
 
     resolved = await client.post(
         "/v1/auth/login",
-        json={"email": "shared@acme.test", "password": "supersecret123", "organization_name": "Beta"},
+        json={
+            "email": "shared@acme.test",
+            "password": "supersecret123",
+            "organization_name": "Beta",
+        },
     )
     assert resolved.status_code == 200

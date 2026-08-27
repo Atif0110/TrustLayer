@@ -35,7 +35,10 @@ async def list_agents(*, user: User, session: AsyncSession) -> list[Agent]:
 
 async def get_agent(*, agent_id: str, user: User, session: AsyncSession) -> Agent:
     agent = await session.scalar(
-        select(Agent).where(Agent.id == cast(agent_id, PGUUID(as_uuid=True)), Agent.organization_id == user.organization_id)
+        select(Agent).where(
+            Agent.id == cast(agent_id, PGUUID(as_uuid=True)),
+            Agent.organization_id == user.organization_id,
+        )
     )
     if agent is None:
         raise LookupError("agent not found")
@@ -46,13 +49,18 @@ async def list_agent_keys(*, agent_id: str, user: User, session: AsyncSession) -
     await get_agent(agent_id=agent_id, user=user, session=session)
     result = await session.scalars(
         select(AgentKey)
-        .where(AgentKey.agent_id == cast(agent_id, PGUUID(as_uuid=True)), AgentKey.organization_id == user.organization_id)
+        .where(
+            AgentKey.agent_id == cast(agent_id, PGUUID(as_uuid=True)),
+            AgentKey.organization_id == user.organization_id,
+        )
         .order_by(AgentKey.created_at.desc())
     )
     return list(result.all())
 
 
-async def rotate_agent_key(*, agent_id: str, user: User, session: AsyncSession) -> tuple[AgentKey, str]:
+async def rotate_agent_key(
+    *, agent_id: str, user: User, session: AsyncSession
+) -> tuple[AgentKey, str]:
     agent = await get_agent(agent_id=agent_id, user=user, session=session)
     active_keys = await session.scalars(
         select(AgentKey).where(
@@ -78,7 +86,9 @@ async def rotate_agent_key(*, agent_id: str, user: User, session: AsyncSession) 
     return agent_key, raw_key
 
 
-async def revoke_agent_key(*, agent_id: str, key_id: str, user: User, session: AsyncSession) -> AgentKey:
+async def revoke_agent_key(
+    *, agent_id: str, key_id: str, user: User, session: AsyncSession
+) -> AgentKey:
     await get_agent(agent_id=agent_id, user=user, session=session)
     agent_key = await session.scalar(
         select(AgentKey).where(

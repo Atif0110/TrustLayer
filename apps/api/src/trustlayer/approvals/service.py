@@ -12,7 +12,9 @@ from trustlayer.models.authorization import AuthorizationRequest
 from trustlayer.models.user import User, UserRole
 
 
-async def list_pending_approvals(*, user: User, session: AsyncSession) -> list[tuple[ApprovalRequest, AuthorizationRequest]]:
+async def list_pending_approvals(
+    *, user: User, session: AsyncSession
+) -> list[tuple[ApprovalRequest, AuthorizationRequest]]:
     rows = await session.execute(
         select(ApprovalRequest, AuthorizationRequest)
         .join(AuthorizationRequest)
